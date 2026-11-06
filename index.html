@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol&family=Kiwi+Maru&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
-        <link rel="manifest" href="manifest.json">
+        <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
         <meta name="theme-color" content="#FAAD21">
         <link rel="icon" type="image/png" href="icon.png">
         <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script><!-- LottieFiles -->
@@ -289,11 +289,16 @@
                 const isImportant = important_CheckedDate.includes(String(originalIndex));
                 const importantBtnClass = isImportant ? 'important-btn on' : 'important-btn';
 
+                const safeSub = escapeHTML(sub || '?');
+                const safeType = escapeHTML(type || '未指定');
+                const safeDate = escapeHTML(parseDate.text || '未指定');
+                const safeInfo = escapeHTML(info || '説明はありません');
+
                 const calendar_cade_html = `
-                    <div class="sub" style="background-color:${subColor}">${sub || '?'}</div>
-                    <div class="type">${type || '未指定'}</div><hr>
-                    <div class="date">${parsedDate.text || '未指定'}</div><hr>
-                    <div class="info">${info || '説明はありません'}</div>
+                    <div class="sub" style="background-color:${subColor}">${safeSub}</div>
+                    <div class="type">${safeType}</div><hr>
+                    <div class="date">${date}</div><hr>
+                    <div class="info">${safeInfo}</div>
                     <div class="buttons"><hr>
                         <button class="${importantBtnClass}" onclick="importantBtn(this);"><icon>&#xe000;</icon></button>
                         <button class="${checkBtnClass}" onclick="checkBtn_change(this);"><icon>&#xe86c;</icon></button>
@@ -369,12 +374,13 @@
                     }
                 });
             }
-            
 
             function fetchHaveError(error){
                 console.error(error);
             }
             // (一時コピー) 実験用(アカウント：ebi200276)：https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9YY1StNsNVb8LZAWyZMt3MqqpT4AE4_55pv2wJ7UbzeS0g_QXcNVxVaTutthA7MO3k7_oDLMyg66o/pub?output=tsv
+            // 実験用(外部)：https://docs.google.com/spreadsheets/d/e/2PACX-1vRrT4YhgGKSu3Mod5zXb_NPmdtLSEOAqaOk30FJ9kzH4gDIAV0ETQccUjM_6YphrlAGjbk5XDOFARON/pub?output=tsv
+            // 本番用：https://docs.google.com/spreadsheets/d/e/2PACX-1vTSSIOfnx4Ieco3lGLOAXxl34GAtHHym4SMjNeEFKIXh4YXuX04Z_vGkx_9XU4Aw82ilEsS_B5LMK7b/pub?output=tsv
             // (1)受信
             fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTSSIOfnx4Ieco3lGLOAXxl34GAtHHym4SMjNeEFKIXh4YXuX04Z_vGkx_9XU4Aw82ilEsS_B5LMK7b/pub?output=tsv')
                 .then((response) => {
@@ -539,7 +545,16 @@
 
                 return diffDay >= 0 && diffDay <= 20;
             }
-            
+            // html(<script>)などを安全な文字化
+            function escapeHTML(str) {
+                if (!str) return '';
+                return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+            }
 
         </script>
     </body>
